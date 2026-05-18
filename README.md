@@ -56,7 +56,7 @@ The student has the material. They don't have a system that strips the noise and
 ## What ClearDesk Does
 
 ```
-┌──────────────────────────────────────────────┐
+┌─────────────────────────────────────────────┐
                                                                  
   01  →  Dump everything in your head. One line each.              
                                                                     
@@ -73,7 +73,7 @@ The student has the material. They don't have a system that strips the noise and
                                                          
   06  →  Next item surfaces. Repeat until desk = clear. 
                                                          
-└────────────────────────────────────────────────┘
+└───────────────────────────────────────────────┘
 ```
 
 ---
