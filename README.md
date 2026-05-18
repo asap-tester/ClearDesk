@@ -1,8 +1,8 @@
 <!--
   ╔══════════════════════════════════════════════════════════════╗
-  ║                        CLEARDESK                            ║
-  ║         When everything feels urgent,                       ║
-  ║              one thing is actually next.                    ║
+  ║                        CLEARDESK                                        ║
+  ║         When everything feels urgent,                                   ║
+  ║              one thing is actually next.                                ║
   ╚══════════════════════════════════════════════════════════════╝
 -->
 
@@ -12,12 +12,12 @@
 
 ```
 ╔═══════════════════════════════════════╗
-║                                       ║
-║           C L E A R D E S K          ║
-║                                       ║
-║   When everything feels urgent,       ║
-║   one thing is actually next.         ║
-║                                       ║
+║                                              ║
+║           C L E A R D E S K                  ║
+║                                              ║
+║   When everything feels urgent,              ║
+║   one thing is actually next.                ║
+║                                              ║
 ╚═══════════════════════════════════════╝
 ```
 
