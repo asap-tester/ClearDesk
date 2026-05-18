@@ -56,24 +56,24 @@ The student has the material. They don't have a system that strips the noise and
 ## What ClearDesk Does
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                                                                   
-│  01  →  Dump everything in your head. One line each.              
-│                                                                    
-│  02  →  Hit "Clear My Desk"                                        
-│                                                                     
-│  03  →  App scores each item on 3 silent axes                       
-│         · Exam relevance                                             
-│         · Time sensitivity                                           
-│         · Actionability right now                                   
-│                                                                     
-│  04  →  ONE thing surfaces. One calm sentence: why.                
-│                                                         
-│  05  →  Timer starts. You work. You mark it done.      
-│                                                         
-│  06  →  Next item surfaces. Repeat until desk = clear. 
-│                                                         
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+                                                                 
+  01  →  Dump everything in your head. One line each.              
+                                                                    
+  02  →  Hit "Clear My Desk"                                        
+                                                                     
+  03  →  App scores each item on 3 silent axes                       
+         · Exam relevance                                             
+         · Time sensitivity                                           
+         · Actionability right now                                   
+                                                                    
+  04  →  ONE thing surfaces. One calm sentence: why.                
+                                                        
+  05  →  Timer starts. You work. You mark it done.      
+                                                         
+  06  →  Next item surfaces. Repeat until desk = clear. 
+                                                         
+└────────────────────────────────────────────────┘
 ```
 
 ---
