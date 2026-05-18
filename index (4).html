@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#06060f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ClearDesk — One thing at a time</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; width: 100%; overflow-x: hidden; }
+
+/* ── CSS VARIABLES ── */
+:root {
+  --accent: #7c3aed;
+  --accent-glow: rgba(124, 58, 237, 0.3);
+  --success: #10b981;
+  --warning: #f59e0b;
+  --text-primary: rgba(255,255,255,0.95);
+  --text-secondary: rgba(255,255,255,0.55);
+  --text-muted: rgba(255,255,255,0.3);
+}
+
+/* ── BASE ── */
+body {
+  background: #06060f;
+  min-height: 100vh;
+  font-family: 'Outfit', sans-serif;
+  color: #e8e6f0;
+  position: relative;
+}
+
+/* ── LAYER 1: mesh gradient ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 30%, rgba(139,92,246,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 80% at 80% 70%, rgba(59,130,246,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 50% at 50% 100%, rgba(16,185,129,0.04) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── LAYER 2: noise grain ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── GLASS BASE ── */
+.glass {
+  position: relative;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.05) inset,
+    0 1px 0 rgba(255,255,255,0.1) inset,
+    0 -1px 0 rgba(0,0,0,0.3) inset,
+    0 20px 60px rgba(0,0,0,0.5),
+    0 1px 3px rgba(0,0,0,0.3);
+  overflow: hidden;
+  z-index: 2;
+}
+.glass::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4) 30%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.4) 70%, transparent);
+  border-radius: 50%;
+  z-index: 3;
+}
+.glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, transparent 40%, rgba(0,0,0,0.1) 100%);
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* ── GLASS ELEVATED ── */
+.glass-elevated {
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.04) 100%);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.08) inset,
+    0 1px 0 rgba(255,255,255,0.15) inset,
+    0 32px 80px rgba(0,0,0,0.6),
+    0 8px 20px rgba(0,0,0,0.4),
+    0 0 60px rgba(139,92,246,0.08);
+}
+
+/* ── LAYOUT ── */
+.app-container {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.app-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-top: 8px;
+}
+.app-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.9rem;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.app-sub {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ── BUTTONS ── */
+.btn-primary {
+  position: relative;
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  padding: 16px 32px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.1) inset,
+    0 1px 0 rgba(255,255,255,0.2) inset,
+    0 8px 32px rgba(124,58,237,0.4),
+    0 2px 8px rgba(0,0,0,0.3);
+  min-height: 52px;
+  width: 100%;
+}
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transition: left 0.4s ease;
+}
+.btn-primary:hover::before { left: 100%; }
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.12) inset,
+    0 1px 0 rgba(255,255,255,0.25) inset,
+    0 12px 40px rgba(124,58,237,0.5),
+    0 4px 12px rgba(0,0,0,0.3);
+}
+.btn-primary:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.08) inset,
+    0 4px 16px rgba(124,58,237,0.3),
+    0 1px 4px rgba(0,0,0,0.3);
+}
+
+.btn-secondary {
+  position: relative;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  color: rgba(255,255,255,0.75);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 44px;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 4px 12px rgba(0,0,0,0.2);
+}
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.95);
+  transform: translateY(-1px);
+}
+.btn-secondary:active { transform: scale(0.97); background: rgba(255,255,255,0.04); }
+
+.btn-done {
+  background: linear-gradient(135deg, #059669, #10b981);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.1) inset,
+    0 1px 0 rgba(255,255,255,0.2) inset,
+    0 8px 32px rgba(16,185,129,0.35),
+    0 2px 8px rgba(0,0,0,0.3);
+  border: none;
+  border-radius: 14px;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 16px 32px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  min-height: 52px;
+  width: 100%;
+  position: relative;
+}
+.btn-done:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.12) inset,
+    0 12px 40px rgba(16,185,129,0.45),
+    0 4px 12px rgba(0,0,0,0.3);
+}
+.btn-done:active { transform: scale(0.98); }
+
+/* ── TEXTAREA ── */
+.brain-dump-input {
+  width: 100%;
+  min-height: 220px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  color: rgba(255,255,255,0.9);
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  padding: 20px;
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2) inset;
+}
+.brain-dump-input:focus {
+  border-color: rgba(124,58,237,0.5);
+  background: rgba(255,255,255,0.05);
+  box-shadow:
+    0 2px 12px rgba(0,0,0,0.2) inset,
+    0 0 0 3px rgba(124,58,237,0.15),
+    0 0 20px rgba(124,58,237,0.08);
+}
+.brain-dump-input::placeholder { color: rgba(255,255,255,0.22); }
+
+/* ── TIMER RING ── */
+.timer-ring {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto;
+}
+.timer-ring svg { transform: rotate(-90deg); display: block; }
+.timer-ring .track { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 4; }
+.timer-ring .progress {
+  fill: none;
+  stroke: url(#timerGradient);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+.timer-number {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Serif Display', serif;
+  font-size: 2rem;
+  color: rgba(255,255,255,0.95);
+  letter-spacing: -0.02em;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.reveal { opacity: 0; animation: fadeUp 0.5s ease forwards; }
+.reveal-1 { animation-delay: 0.1s; }
+.reveal-2 { animation-delay: 0.25s; }
+.reveal-3 { animation-delay: 0.4s; }
+.reveal-4 { animation-delay: 0.55s; }
+
+@keyframes slideOut {
+  to { opacity: 0; transform: translateY(-30px); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes completePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.04); }
+  100% { transform: scale(1); opacity: 0.5; }
+}
+@keyframes shimmerReveal {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes deskCleared {
+  0%   { opacity: 0; transform: scale(0.95); }
+  60%  { transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes timer-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+.timer-active .timer-number {
+  animation: timer-pulse 2s ease-in-out infinite;
+}
+@keyframes placeholderFade {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── VIEW SCREENS ── */
+.view {
+  display: none;
+  animation: slideIn 0.45s ease forwards;
+}
+.view.active { display: block; }
+.view.exit { animation: slideOut 0.3s ease forwards; }
+
+/* ── DUMP SCREEN ── */
+#dump-screen .card {
+  padding: 28px 24px;
+  margin-bottom: 16px;
+}
+#dump-screen .dump-intro {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+#dump-screen .dump-sub {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+.placeholder-wrapper {
+  position: relative;
+}
+.placeholder-text {
+  position: absolute;
+  top: 20px; left: 20px;
+  pointer-events: none;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.05rem;
+  color: rgba(255,255,255,0.22);
+  line-height: 1.8;
+  transition: opacity 0.6s ease;
+  opacity: 0;
+}
+.placeholder-text.visible { opacity: 1; }
+
+/* ── ONE THING SCREEN ── */
+#one-thing-screen .label-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  display: block;
+}
+#one-thing-screen .one-thing-card {
+  padding: 32px 28px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.one-thing-text {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.6rem;
+  color: var(--text-primary);
+  line-height: 1.35;
+  margin-bottom: 14px;
+  letter-spacing: -0.01em;
+}
+.one-thing-reason {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 28px;
+  font-style: italic;
+}
+.timer-section {
+  margin-bottom: 24px;
+}
+
+/* ── DURATION PICKER ── */
+.duration-picker {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.dur-pill {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  color: var(--text-secondary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 36px;
+}
+.dur-pill:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--text-primary);
+}
+.dur-pill.active {
+  background: rgba(124,58,237,0.2);
+  border-color: rgba(124,58,237,0.5);
+  color: var(--text-primary);
+  box-shadow: 0 0 12px rgba(124,58,237,0.15);
+}
+
+/* ── NUDGE CONTROLS (±5 min) ── */
+.timer-nudge-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+.nudge-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  line-height: 1;
+  padding: 0;
+}
+.nudge-btn:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.22);
+  color: var(--text-primary);
+  transform: scale(1.08);
+}
+.nudge-btn:active { transform: scale(0.95); }
+
+/* ── SHOW TIMER LINK ── */
+.show-timer-link {
+  text-align: center;
+  margin-top: 10px;
+}
+.show-timer-link button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 6px 10px;
+  transition: color 0.2s;
+  min-height: 36px;
+}
+.show-timer-link button:hover { color: var(--text-secondary); }
+.timer-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.timer-controls .btn-secondary {
+  flex: 1;
+  min-width: 120px;
+  max-width: 160px;
+  font-size: 0.85rem;
+  padding: 10px 18px;
+}
+.btn-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.btn-row .btn-secondary {
+  flex: 1;
+  font-size: 0.85rem;
+  text-align: center;
+}
+.completed-count {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 12px;
+}
+.completed-count span {
+  color: var(--success);
+  font-weight: 600;
+}
+
+/* timer end overlay */
+.timer-end-overlay {
+  display: none;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  margin-top: 14px;
+}
+.timer-end-overlay.visible { display: block; }
+.timer-end-msg {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+.timer-end-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.timer-end-btns button { flex: 1; min-width: 120px; font-size: 0.85rem; padding: 10px 14px; }
+
+/* ── QUEUE PANEL ── */
+.queue-toggle {
+  width: 100%;
+  text-align: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  padding: 12px 0;
+  transition: color 0.2s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.queue-toggle:hover { color: var(--text-secondary); }
+.queue-toggle .arrow { transition: transform 0.25s ease; display: inline-block; }
+.queue-toggle.open .arrow { transform: rotate(180deg); }
+
+.queue-panel {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.35s ease, opacity 0.25s ease;
+  opacity: 0;
+}
+.queue-panel.open {
+  max-height: 600px;
+  opacity: 1;
+}
+.queue-inner {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.queue-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  opacity: 0.55;
+  transition: opacity 0.2s;
+}
+.queue-item:hover { opacity: 0.75; }
+.queue-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+.dot-green  { background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.5); }
+.dot-amber  { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,0.5); }
+.dot-grey   { background: rgba(255,255,255,0.3); }
+.queue-item-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  flex: 1;
+}
+.queue-show-more {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px 0;
+  transition: color 0.2s;
+}
+.queue-show-more:hover { color: var(--text-secondary); }
+
+/* ── DONE SCREEN ── */
+#done-screen {
+  text-align: center;
+  min-height: 70vh;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px 16px;
+}
+#done-screen.active {
+  display: flex;
+  animation: deskCleared 0.7s ease forwards;
+}
+.done-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.05));
+  border: 1px solid rgba(16,185,129,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  box-shadow: 0 0 40px rgba(16,185,129,0.15);
+}
+.done-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.2rem;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+.done-count {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.done-count strong { color: var(--success); }
+.done-sub {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  font-style: italic;
+  max-width: 320px;
+}
+#done-screen .btn-primary { max-width: 280px; }
+
+/* ── START FRESH ── */
+.start-fresh-row {
+  text-align: center;
+  margin-top: 16px;
+}
+.start-fresh-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 8px 12px;
+  transition: color 0.2s;
+  letter-spacing: 0.02em;
+  min-height: 36px;
+}
+.start-fresh-btn:hover { color: rgba(239,68,68,0.7); }
+
+/* ── DIVIDER ── */
+.section-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.05);
+  margin: 8px 0;
+}
+
+/* ── UTIL ── */
+.mt-12 { margin-top: 12px; }
+.mt-16 { margin-top: 16px; }
+.mt-20 { margin-top: 20px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 375px) {
+  .app-container { padding: 16px 12px 50px; }
+  .one-thing-text { font-size: 1.35rem; }
+  #dump-screen .dump-intro { font-size: 1.3rem; }
+  .brain-dump-input { font-size: 0.95rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- ── HEADER ── -->
+  <header class="app-header reveal reveal-1">
+    <div class="app-name">ClearDesk</div>
+    <div class="app-sub">When everything feels urgent, one thing is actually next</div>
+  </header>
+
+  <!-- ════════════════════════════════
+       VIEW 1 — BRAIN DUMP
+  ════════════════════════════════ -->
+  <div id="dump-screen" class="view active">
+
+    <div class="glass card reveal reveal-2">
+      <div class="dump-intro">What's crowding your mind right now?</div>
+      <div class="dump-sub">One item per line. No structure needed. Just get it out.</div>
+
+      <div class="placeholder-wrapper">
+        <textarea id="dumpInput" class="brain-dump-input" autocomplete="off" autocorrect="off" spellcheck="false" rows="10"></textarea>
+        <div id="placeholder" class="placeholder-text visible"></div>
+      </div>
+    </div>
+
+    <div class="reveal reveal-3 mt-12">
+      <button class="btn-primary" id="clearDeskBtn">Clear My Desk</button>
+    </div>
+
+    <div class="reveal reveal-4 start-fresh-row">
+      <button class="start-fresh-btn" id="startFreshDump">↺ Start fresh session</button>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════
+       VIEW 2 — ONE THING
+  ════════════════════════════════ -->
+  <div id="one-thing-screen" class="view">
+
+    <div class="glass glass-elevated one-thing-card reveal reveal-1">
+      <span class="label-tag">Your one thing</span>
+      <div class="one-thing-text" id="oneThing"></div>
+      <div class="one-thing-reason" id="oneThingReason"></div>
+
+      <div class="section-divider"></div>
+
+      <!-- TIMER -->
+      <div class="timer-section mt-20" id="timerSection">
+
+        <!-- Duration picker row: −5 | 15 | 25 | 45 | +5 -->
+        <div class="duration-picker" id="durationPicker">
+          <button class="nudge-btn" id="nudgeMinusBtn" title="−5 min">−5</button>
+          <button class="dur-pill" data-mins="15">15 min</button>
+          <button class="dur-pill active" data-mins="25">25 min</button>
+          <button class="dur-pill" data-mins="45">45 min</button>
+          <button class="nudge-btn" id="nudgePlusBtn" title="+5 min">+5</button>
+        </div>
+
+        <div class="timer-ring" id="timerRing">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <defs>
+              <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#7c3aed"/>
+                <stop offset="100%" stop-color="#4f46e5"/>
+              </linearGradient>
+            </defs>
+            <circle class="track" cx="70" cy="70" r="62"/>
+            <circle class="progress" id="timerProgress" cx="70" cy="70" r="62"
+              stroke-dasharray="389.557"
+              stroke-dashoffset="0"/>
+          </svg>
+          <div class="timer-number" id="timerDisplay">25:00</div>
+        </div>
+
+        <div class="timer-controls" id="timerControls">
+          <button class="btn-secondary" id="startTimerBtn">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" style="display:inline;vertical-align:middle;margin-right:6px"><path d="M3 1.5l9 5.5-9 5.5V1.5z"/></svg>Start Timer
+          </button>
+          <button class="btn-secondary" id="skipTimerBtn">Skip Timer</button>
+        </div>
+
+        <div class="timer-controls" id="timerActiveControls" style="display:none">
+          <button class="btn-secondary" id="pauseTimerBtn">
+            <svg id="pauseIcon" width="14" height="14" viewBox="0 0 14 14" fill="currentColor" style="display:inline;vertical-align:middle;margin-right:6px"><rect x="2" y="1.5" width="3.5" height="11" rx="1"/><rect x="8.5" y="1.5" width="3.5" height="11" rx="1"/></svg><span id="pauseLabel">Pause</span>
+          </button>
+          <button class="btn-secondary" id="resetTimerBtn">↺ Reset</button>
+        </div>
+
+        <div class="timer-end-overlay" id="timerEndOverlay">
+          <div class="timer-end-msg">Time's up. How did it go?</div>
+          <div class="timer-end-btns">
+            <button class="btn-done" id="timerDoneBtn">✓ Finished it</button>
+            <button class="btn-secondary" id="timerMoreBtn">→ More time</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Show timer link — appears after Skip Timer is pressed -->
+      <div class="show-timer-link" id="showTimerLink" style="display:none">
+        <button id="showTimerBtn">⏱ Use a timer</button>
+      </div>
+
+    </div>
+
+    <div class="reveal reveal-2 mt-12">
+      <button class="btn-done" id="doneBtn">✓ Done — What's Next?</button>
+    </div>
+
+    <div class="reveal reveal-3">
+      <div class="completed-count" id="completedCount"></div>
+    </div>
+
+    <!-- QUEUE -->
+    <div class="reveal reveal-3">
+      <button class="queue-toggle" id="queueToggle">
+        <span id="queueLabel">↓ See full queue</span>
+        <span class="arrow">▾</span>
+      </button>
+      <div class="glass queue-panel" id="queuePanel">
+        <div class="queue-inner" id="queueInner"></div>
+      </div>
+    </div>
+
+    <div class="start-fresh-row reveal reveal-4">
+      <button class="start-fresh-btn" id="startFreshOne">↺ Start fresh session</button>
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════
+       VIEW 3 — DONE STATE
+  ════════════════════════════════ -->
+  <div id="done-screen">
+    <div class="done-icon">✦</div>
+    <div class="done-title">Desk cleared.</div>
+    <div class="done-count" id="doneCount"></div>
+    <div class="done-sub">Come back when the noise starts again.</div>
+    <button class="btn-primary" id="newSessionBtn" style="max-width:280px">Start New Session</button>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════ -->
+<script>
+/* ────────────────────────────────
+   PLACEHOLDER CYCLING
+──────────────────────────────── */
+const placeholders = [
+  "What's on your mind right now? Dump everything.",
+  "Every worry, every task, every 'I should...' — write it all.",
+  "Don't organise. Just write."
+];
+let phIndex = 0;
+const phEl = document.getElementById('placeholder');
+const dumpInput = document.getElementById('dumpInput');
+
+function cyclePlaceholder() {
+  phEl.classList.remove('visible');
+  setTimeout(() => {
+    phIndex = (phIndex + 1) % placeholders.length;
+    phEl.textContent = placeholders[phIndex];
+    phEl.classList.add('visible');
+  }, 600);
+}
+
+phEl.textContent = placeholders[0];
+setInterval(cyclePlaceholder, 4000);
+
+dumpInput.addEventListener('input', () => {
+  phEl.style.display = dumpInput.value.length > 0 ? 'none' : '';
+});
+dumpInput.addEventListener('focus', () => {
+  phEl.style.display = dumpInput.value.length > 0 ? 'none' : '';
+});
+dumpInput.addEventListener('blur', () => {
+  phEl.style.display = dumpInput.value.length > 0 ? 'none' : '';
+});
+
+/* ────────────────────────────────
+   STATE
+──────────────────────────────── */
+let state = {
+  items: [],          // { text, score, examRel, timeSens, action }
+  currentIndex: 0,
+  completedCount: 0,
+  timerActive: false,
+  timerPaused: false,
+  timerSecondsLeft: 1500,
+  sessionDate: ''
+};
+
+const STORAGE_KEY = 'cleardesk_session_v2';
+
+/* ────────────────────────────────
+   SCORING ENGINE
+──────────────────────────────── */
+function scoreItem(text) {
+  const t = text.toLowerCase();
+
+  // Exam relevance
+  let examRel = 0;
+  if (/chapter|topic|subject|revision|notes|mock|test|exam|study|practice|read|syllabus|formula/.test(t)) examRel = 3;
+  else if (/assignment|submit|deadline|due|paper|project/.test(t)) examRel = 2;
+  else if (/email|message|reply|call|text|whatsapp|tell|ask|meet|sir|ma'am|friend|person/.test(t)) examRel = 1;
+  else examRel = 0;
+
+  // Time sensitivity
+  let timeSens = 1;
+  if (/today|tonight|tomorrow|due|deadline|urgent|now|asap|morning|before class|end of day/.test(t)) timeSens = 3;
+  else if (/this week|soon|by (monday|tuesday|wednesday|thursday|friday|saturday|sunday)|few days/.test(t)) timeSens = 2;
+  else if (/someday|later|eventually|next week|next month/.test(t)) timeSens = 0;
+
+  // Actionability (word count)
+  const wordCount = t.trim().split(/\s+/).length;
+  let action = 2;
+  if (wordCount < 8) action = 3;
+  else if (wordCount > 15 || /figure out|think about|decide|plan for|consider|maybe|not sure/.test(t)) action = 1;
+
+  const score = (examRel * 1.5) + (timeSens * 1.2) + action;
+  return { examRel, timeSens, action, score };
+}
+
+function buildReason(item) {
+  if (item.examRel === 3) return "This directly affects your exam. Everything else can wait.";
+  if (item.timeSens === 3 && item.examRel === 2) return "This is due soon and still unfinished. Handle it first.";
+  if (item.action === 3 && item.score >= 5) return "This is concrete and doable right now. Start here.";
+  return "Your brain flagged this most. Trust it.";
+}
+
+function getDotClass(item) {
+  if (item.examRel === 3) return 'dot-green';
+  if (item.timeSens === 3 || item.examRel === 2) return 'dot-amber';
+  return 'dot-grey';
+}
+
+function parseDump(raw) {
+  return raw.split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 0)
+    .map(text => ({ text, ...scoreItem(text) }))
+    .sort((a, b) => b.score - a.score);
+}
+
+/* ────────────────────────────────
+   PERSISTENCE
+──────────────────────────────── */
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    // reset daily cleared count if different day
+    const today = new Date().toDateString();
+    if (s.sessionDate !== today) s.completedCount = 0;
+    return s;
+  } catch(e) { return null; }
+}
+function clearState() {
+  localStorage.removeItem(STORAGE_KEY);
+  state = { items: [], currentIndex: 0, completedCount: 0, timerActive: false, timerPaused: false, timerSecondsLeft: selectedDurationMins * 60, sessionDate: new Date().toDateString() };
+}
+
+/* ────────────────────────────────
+   VIEWS
+──────────────────────────────── */
+function showView(id) {
+  ['dump-screen','one-thing-screen','done-screen'].forEach(v => {
+    const el = document.getElementById(v);
+    el.classList.remove('active');
+    if (v === 'done-screen') el.style.display = 'none';
+  });
+  if (id === 'done-screen') {
+    const el = document.getElementById('done-screen');
+    el.style.display = 'flex';
+    requestAnimationFrame(() => el.classList.add('active'));
+  } else {
+    document.getElementById(id).classList.add('active');
+  }
+}
+
+/* ────────────────────────────────
+   TIMER
+──────────────────────────────── */
+let selectedDurationMins = 25;          // tracks chosen duration
+const circumference = 2 * Math.PI * 62; // 389.557
+let timerInterval = null;
+const timerProgress = document.getElementById('timerProgress');
+const timerDisplay  = document.getElementById('timerDisplay');
+const timerRing     = document.getElementById('timerRing');
+
+function getTimerTotal() { return selectedDurationMins * 60; }
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function updateTimerUI(secondsLeft) {
+  timerDisplay.textContent = formatTime(secondsLeft);
+  const total = getTimerTotal();
+  const progress = secondsLeft / total;
+  timerProgress.style.strokeDashoffset = circumference * (1 - progress);
+}
+
+/* Nudge ±5 min — only works before timer starts */
+const MIN_DURATION_SECS = 300;   // 5 min floor
+const MAX_DURATION_SECS = 5400;  // 90 min ceiling
+
+function nudgeTimer(deltaMins) {
+  if (timerInterval) return; // locked during countdown
+  const delta = deltaMins * 60;
+  let next = state.timerSecondsLeft + delta;
+  next = Math.max(MIN_DURATION_SECS, Math.min(MAX_DURATION_SECS, next));
+  state.timerSecondsLeft = next;
+  selectedDurationMins = Math.round(next / 60);
+  // deactivate preset pills — custom duration
+  document.querySelectorAll('.dur-pill').forEach(p => p.classList.remove('active'));
+  updateTimerUI(next);
+  saveState();
+}
+
+document.getElementById('nudgeMinusBtn').addEventListener('click', () => nudgeTimer(-5));
+document.getElementById('nudgePlusBtn').addEventListener('click',  () => nudgeTimer(+5));
+
+/* Duration pill click handler */
+document.querySelectorAll('.dur-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    if (timerInterval) return; // don't switch mid-countdown
+    document.querySelectorAll('.dur-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    selectedDurationMins = parseInt(pill.dataset.mins);
+    state.timerSecondsLeft = getTimerTotal();
+    updateTimerUI(state.timerSecondsLeft);
+    saveState();
+  });
+});
+
+function startTimer() {
+  if (timerInterval) return;
+  state.timerActive = true;
+  state.timerPaused = false;
+  timerRing.classList.add('timer-active');
+  document.getElementById('timerControls').style.display = 'none';
+  document.getElementById('timerActiveControls').style.display = 'flex';
+  document.getElementById('durationPicker').style.display = 'none'; // hide picker+nudge during run
+  document.getElementById('nudgeMinusBtn').style.opacity = '0.2';
+  document.getElementById('nudgePlusBtn').style.opacity = '0.2';
+  document.getElementById('nudgeMinusBtn').style.pointerEvents = 'none';
+  document.getElementById('nudgePlusBtn').style.pointerEvents = 'none';
+  document.getElementById('timerEndOverlay').classList.remove('visible');
+
+  timerInterval = setInterval(() => {
+    state.timerSecondsLeft--;
+    updateTimerUI(state.timerSecondsLeft);
+    saveState();
+    if (state.timerSecondsLeft <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerRing.classList.remove('timer-active');
+      state.timerActive = false;
+      document.getElementById('timerActiveControls').style.display = 'none';
+      document.getElementById('timerEndOverlay').classList.add('visible');
+      saveState();
+    }
+  }, 1000);
+}
+
+function pauseTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerRing.classList.remove('timer-active');
+  state.timerPaused = true;
+  // swap to play icon
+  document.getElementById('pauseIcon').innerHTML = '<path d="M3 1.5l9 5.5-9 5.5V1.5z"/>';
+  document.getElementById('pauseLabel').textContent = 'Resume';
+  document.getElementById('pauseTimerBtn').onclick = resumeTimer;
+}
+
+function resumeTimer() {
+  state.timerPaused = false;
+  // swap back to pause icon
+  document.getElementById('pauseIcon').innerHTML = '<rect x="2" y="1.5" width="3.5" height="11" rx="1"/><rect x="8.5" y="1.5" width="3.5" height="11" rx="1"/>';
+  document.getElementById('pauseLabel').textContent = 'Pause';
+  document.getElementById('pauseTimerBtn').onclick = pauseTimer;
+  startTimer();
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerRing.classList.remove('timer-active');
+  state.timerSecondsLeft = getTimerTotal();
+  state.timerActive = false;
+  state.timerPaused = false;
+  updateTimerUI(getTimerTotal());
+  document.getElementById('timerControls').style.display = 'flex';
+  document.getElementById('timerActiveControls').style.display = 'none';
+  document.getElementById('timerEndOverlay').classList.remove('visible');
+  document.getElementById('durationPicker').style.display = 'flex'; // restore picker + nudge btns
+  document.getElementById('nudgeMinusBtn').style.opacity = '';
+  document.getElementById('nudgePlusBtn').style.opacity = '';
+  document.getElementById('nudgeMinusBtn').style.pointerEvents = '';
+  document.getElementById('nudgePlusBtn').style.pointerEvents = '';
+  // restore pause icon to pause state
+  document.getElementById('pauseIcon').innerHTML = '<rect x="2" y="1.5" width="3.5" height="11" rx="1"/><rect x="8.5" y="1.5" width="3.5" height="11" rx="1"/>';
+  document.getElementById('pauseLabel').textContent = 'Pause';
+  document.getElementById('pauseTimerBtn').onclick = pauseTimer;
+  saveState();
+}
+
+function skipTimer() {
+  resetTimer();
+  // Hide timer section, show "Use a timer" link instead
+  document.getElementById('timerSection').style.display = 'none';
+  document.getElementById('showTimerLink').style.display = 'block';
+}
+
+function showTimer() {
+  document.getElementById('timerSection').style.display = 'block';
+  document.getElementById('showTimerLink').style.display = 'none';
+  resetTimer();
+}
+
+/* ────────────────────────────────
+   RENDER ONE THING
+──────────────────────────────── */
+function renderOneThing() {
+  const item = state.items[state.currentIndex];
+  if (!item) { showDoneState(); return; }
+
+  document.getElementById('oneThing').textContent = item.text;
+  document.getElementById('oneThingReason').textContent = buildReason(item);
+
+  // completed count
+  const cc = document.getElementById('completedCount');
+  if (state.completedCount > 0) {
+    cc.innerHTML = `You've cleared <span>${state.completedCount}</span> item${state.completedCount !== 1 ? 's' : ''} today`;
+  } else {
+    cc.textContent = '';
+  }
+
+  // reset timer
+  resetTimer();
+  document.getElementById('timerSection').style.display = 'block';
+
+  // queue
+  renderQueue();
+
+  showView('one-thing-screen');
+  saveState();
+}
+
+/* ────────────────────────────────
+   RENDER QUEUE
+──────────────────────────────── */
+let queueShowAll = false;
+function renderQueue() {
+  const remaining = state.items.slice(state.currentIndex + 1);
+  const label = document.getElementById('queueLabel');
+  label.textContent = remaining.length === 0
+    ? '✓ Queue empty'
+    : `↓ See full queue (${remaining.length} item${remaining.length !== 1 ? 's' : ''} remaining)`;
+
+  const inner = document.getElementById('queueInner');
+  inner.innerHTML = '';
+
+  if (remaining.length === 0) {
+    inner.innerHTML = '<div style="text-align:center;font-size:0.82rem;color:var(--text-muted);padding:8px 0">All items handled.</div>';
+    return;
+  }
+
+  const toShow = queueShowAll ? remaining : remaining.slice(0, 3);
+  toShow.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'queue-item';
+    div.innerHTML = `
+      <span class="queue-dot ${getDotClass(item)}"></span>
+      <span class="queue-item-text">${escapeHtml(item.text)}</span>
+    `;
+    inner.appendChild(div);
+  });
+
+  if (remaining.length > 3) {
+    const more = document.createElement('div');
+    more.className = 'queue-show-more';
+    if (!queueShowAll) {
+      more.textContent = `+ ${remaining.length - 3} more — tap to show`;
+      more.onclick = () => { queueShowAll = true; renderQueue(); };
+    } else {
+      more.textContent = '↑ Show less';
+      more.onclick = () => { queueShowAll = false; renderQueue(); };
+    }
+    inner.appendChild(more);
+  }
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ────────────────────────────────
+   DONE STATE
+──────────────────────────────── */
+function showDoneState() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  const n = state.completedCount;
+  document.getElementById('doneCount').innerHTML =
+    `<strong>${n}</strong> thing${n !== 1 ? 's' : ''} handled.`;
+  showView('done-screen');
+  saveState();
+}
+
+/* ────────────────────────────────
+   MARK COMPLETE → NEXT
+──────────────────────────────── */
+function markDone() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerRing.classList.remove('timer-active');
+  state.completedCount++;
+  state.currentIndex++;
+  state.timerSecondsLeft = getTimerTotal();
+  state.timerActive = false;
+  state.timerPaused = false;
+  queueShowAll = false;
+  // Always restore timer section for next item
+  document.getElementById('timerSection').style.display = 'block';
+  document.getElementById('showTimerLink').style.display = 'none';
+  saveState();
+  if (state.currentIndex >= state.items.length) {
+    showDoneState();
+  } else {
+    renderOneThing();
+  }
+}
+
+/* ────────────────────────────────
+   START FRESH
+──────────────────────────────── */
+function startFresh() {
+  if (!confirm('Clear your current session and start fresh?')) return;
+  clearInterval(timerInterval);
+  timerInterval = null;
+  clearState();
+  dumpInput.value = '';
+  phEl.style.display = '';
+  queueShowAll = false;
+  // Reset queue toggle
+  document.getElementById('queuePanel').classList.remove('open');
+  document.getElementById('queueToggle').classList.remove('open');
+  showView('dump-screen');
+}
+
+/* ────────────────────────────────
+   EVENT LISTENERS
+──────────────────────────────── */
+// Clear my desk
+document.getElementById('clearDeskBtn').addEventListener('click', () => {
+  const raw = dumpInput.value.trim();
+  if (!raw) {
+    dumpInput.style.borderColor = 'rgba(239,68,68,0.4)';
+    dumpInput.placeholder = '';
+    phEl.textContent = 'Write at least one thing first.';
+    phEl.style.display = '';
+    setTimeout(() => {
+      dumpInput.style.borderColor = '';
+      phEl.textContent = placeholders[phIndex];
+    }, 2000);
+    return;
+  }
+  const parsed = parseDump(raw);
+  if (parsed.length === 0) return;
+  state.items = parsed;
+  state.currentIndex = 0;
+  state.timerSecondsLeft = getTimerTotal();
+  state.timerActive = false;
+  state.timerPaused = false;
+  state.sessionDate = new Date().toDateString();
+  saveState();
+  renderOneThing();
+});
+
+// Done → next
+document.getElementById('doneBtn').addEventListener('click', markDone);
+document.getElementById('timerDoneBtn').addEventListener('click', markDone);
+
+// Timer controls
+document.getElementById('startTimerBtn').addEventListener('click', startTimer);
+document.getElementById('skipTimerBtn').addEventListener('click', skipTimer);
+document.getElementById('pauseTimerBtn').addEventListener('click', pauseTimer);
+document.getElementById('resetTimerBtn').addEventListener('click', resetTimer);
+document.getElementById('timerMoreBtn').addEventListener('click', resetTimer);
+document.getElementById('showTimerBtn').addEventListener('click', showTimer);
+
+// Queue toggle
+document.getElementById('queueToggle').addEventListener('click', () => {
+  const panel = document.getElementById('queuePanel');
+  const toggle = document.getElementById('queueToggle');
+  panel.classList.toggle('open');
+  toggle.classList.toggle('open');
+});
+
+// Start fresh
+document.getElementById('startFreshDump').addEventListener('click', startFresh);
+document.getElementById('startFreshOne').addEventListener('click', startFresh);
+document.getElementById('newSessionBtn').addEventListener('click', () => {
+  clearState();
+  dumpInput.value = '';
+  phEl.style.display = '';
+  queueShowAll = false;
+  showView('dump-screen');
+});
+
+/* ────────────────────────────────
+   BOOT — CHECK SESSION
+──────────────────────────────── */
+(function boot() {
+  const saved = loadState();
+  if (saved && saved.items && saved.items.length > 0 && saved.currentIndex < saved.items.length) {
+    state = saved;
+    state.timerActive = false;  // don't auto-resume timer
+    state.timerPaused = false;
+    updateTimerUI(state.timerSecondsLeft);
+    renderOneThing();
+  } else if (saved && saved.items && saved.currentIndex >= saved.items.length && saved.items.length > 0) {
+    // all done — show done state
+    state = saved;
+    showDoneState();
+  } else {
+    showView('dump-screen');
+  }
+  updateTimerUI(state.timerSecondsLeft || getTimerTotal());
+})();
+</script>
+</body>
+</html>
